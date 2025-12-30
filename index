@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teilbarkeitsregeln – Lernkarten</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --accent: #3857a6;
+      --accent-soft: #e1e7ff;
+      --text-main: #222831;
+      --text-muted: #666f7a;
+      --border-radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .app {
+      max-width: 480px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      padding: 24px 20px 20px;
+    }
+
+    .header {
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .flashcard {
+      background: var(--accent-soft);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pill {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 0.75rem;
+      background: rgba(56, 87, 166, 0.08);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .question {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .answer {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(56, 87, 166, 0.35);
+      display: none;
+    }
+
+    .answer-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--accent);
+    }
+
+    .answer-text {
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.07s ease, box-shadow 0.07s ease,
+        background 0.15s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(56, 87, 166, 0.4);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--accent);
+      border: 1px solid rgba(56, 87, 166, 0.25);
+    }
+
+    .status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .status span {
+      font-weight: 600;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title">Teilbarkeitsregeln – Lernkarten</div>
+      <div class="subtitle">Zufällige Karte in jeder Runde</div>
+    </div>
+
+    <div class="flashcard" id="flashcard">
+      <div class="pill" id="pillLabel"></div>
+      <div class="question" id="questionText"></div>
+      <div class="hint" id="hintText"></div>
+
+      <div class="answer" id="answerBox">
+        <div class="answer-title">Antwort</div>
+        <div class="answer-text" id="answerText"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-secondary" id="showAnswerBtn">Antwort zeigen</button>
+      <button class="btn-primary" id="nextCardBtn">Nächste Karte</button>
+    </div>
+
+    <div class="status">
+      Karte <span id="cardCount">1</span> – zufällig ausgewählt
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        number: 2,
+        question: "Wann ist eine Zahl durch 2 teilbar?",
+        hint: "Gerade oder ungerade?",
+        rule: "Eine Zahl ist durch 2 teilbar, wenn sie gerade ist (endet auf 0, 2, 4, 6 oder 8)."
+      },
+      {
+        number: 3,
+        question: "Wann ist eine Zahl durch 3 teilbar?",
+        hint: "Denk an die Quersumme.",
+        rule: "Eine Zahl ist durch 3 teilbar, wenn ihre Quersumme durch 3 teilbar ist."
+      },
+      {
+        number: 4,
+        question: "Wann ist eine Zahl durch 4 teilbar?",
+        hint: "Schau dir die letzten zwei Ziffern an.",
+        rule: "Eine Zahl ist durch 4 teilbar, wenn die letzten zwei Ziffern eine durch 4 teilbare Zahl bilden."
+      },
+      {
+        number: 5,
+        question: "Wann ist eine Zahl durch 5 teilbar?",
+        hint: "Letzte Ziffer!",
+        rule: "Eine Zahl ist durch 5 teilbar, wenn sie auf 0 oder 5 endet."
+      },
+      {
+        number: 6,
+        question: "Wann ist eine Zahl durch 6 teilbar?",
+        hint: "Kombination aus zwei Regeln.",
+        rule: "Eine Zahl ist durch 6 teilbar, wenn sie durch 2 und durch 3 teilbar ist."
+      },
+      {
+        number: 8,
+        question: "Wann ist eine Zahl durch 8 teilbar?",
+        hint: "Letzte drei Ziffern.",
+        rule: "Eine Zahl ist durch 8 teilbar, wenn die letzten drei Ziffern eine durch 8 teilbare Zahl bilden."
+      },
+      {
+        number: 9,
+        question: "Wann ist eine Zahl durch 9 teilbar?",
+        hint: "Wie bei 3 – nur stärker.",
+        rule: "Eine Zahl ist durch 9 teilbar, wenn ihre Quersumme durch 9 teilbar ist."
+      },
+      {
+        number: 10,
+        question: "Wann ist eine Zahl durch 10 teilbar?",
+        hint: "Ganz einfach.",
+        rule: "Eine Zahl ist durch 10 teilbar, wenn sie auf 0 endet."
+      },
+      {
+        number: 11,
+        question: "Wann ist eine Zahl durch 11 teilbar?",
+        hint: "Wechselnde Summen.",
+        rule: "Eine Zahl ist durch 11 teilbar, wenn die Differenz aus der Summe der Ziffern an ungeraden und geraden Stellen durch 11 teilbar ist."
+      },
+      {
+        number: 12,
+        question: "Wann ist eine Zahl durch 12 teilbar?",
+        hint: "Kombination aus 3 und 4.",
+        rule: "Eine Zahl ist durch 12 teilbar, wenn sie durch 3 und durch 4 teilbar ist."
+      },
+      {
+        number: 25,
+        question: "Wann ist eine Zahl durch 25 teilbar?",
+        hint: "Letzte zwei Ziffern.",
+        rule: "Eine Zahl ist durch 25 teilbar, wenn sie auf 00, 25, 50 oder 75 endet."
+      },
+      {
+        number: 125,
+        question: "Wann ist eine Zahl durch 125 teilbar?",
+        hint: "Letzte drei Ziffern.",
+        rule: "Eine Zahl ist durch 125 teilbar, wenn sie auf 000, 125, 250, 375, 500, 625, 750 oder 875 endet."
+      }
+    ];
+
+    const pillLabel = document.getElementById("pillLabel");
+    const questionText = document.getElementById("questionText");
+    const hintText = document.getElementById("hintText");
+    const answerBox = document.getElementById("answerBox");
+    const answerText = document.getElementById("answerText");
+    const showAnswerBtn = document.getElementById("showAnswerBtn");
+    const nextCardBtn = document.getElementById("nextCardBtn");
+    const cardCountEl = document.getElementById("cardCount");
+
+    let currentIndex = -1;
+    let totalShown = 0;
+
+    function getRandomIndex() {
+      if (cards.length === 1) return 0;
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * cards.length);
+      } while (idx === currentIndex);
+      return idx;
+    }
+
+    function showRandomCard() {
+      const idx = getRandomIndex();
+      currentIndex = idx;
+      const card = cards[idx];
+
+      pillLabel.textContent = "Teilbar durch " + card.number;
+      questionText.textContent = card.question;
+      hintText.textContent = card.hint;
+      answerText.textContent = card.rule;
+      answerBox.style.display = "none";
+
+      totalShown += 1;
+      cardCountEl.textContent = totalShown;
+    }
+
+    showAnswerBtn.addEventListener("click", () => {
+      answerBox.style.display = "block";
+    });
+
+    nextCardBtn.addEventListener("click", () => {
+      showRandomCard();
+    });
+
+    showRandomCard();
+  </script>
+</body>
+</html>
