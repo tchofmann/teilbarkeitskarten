@@ -134,4 +134,176 @@
     .btn-primary {
       background: var(--accent);
       color: #ffffff;
-      box-shadow: 0 4px 10px rgba(56, 87, 166, 0.
+      box-shadow: 0 4px 10px rgba(56, 87, 166, 0.4);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--accent);
+      border: 1px solid rgba(56, 87, 166, 0.25);
+    }
+
+    .status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .status span {
+      font-weight: 600;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title">Teilbarkeitsregeln – Lernkarten</div>
+      <div class="subtitle">Zufällige Karte in jeder Runde</div>
+    </div>
+
+    <div class="flashcard" id="flashcard">
+      <div class="pill" id="pillLabel"></div>
+      <div class="question" id="questionText"></div>
+      <div class="hint" id="hintText"></div>
+
+      <div class="answer" id="answerBox">
+        <div class="answer-title">Antwort</div>
+        <div class="answer-text" id="answerText"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-secondary" id="showAnswerBtn">Antwort zeigen</button>
+      <button class="btn-primary" id="nextCardBtn">Nächste Karte</button>
+    </div>
+
+    <div class="status">
+      Karte <span id="cardCount">1</span> – zufällig ausgewählt
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        number: 2,
+        question: "Wann ist eine Zahl durch 2 teilbar?",
+        hint: "Gerade oder ungerade?",
+        rule: "Eine Zahl ist durch 2 teilbar, wenn sie gerade ist (endet auf 0, 2, 4, 6 oder 8)."
+      },
+      {
+        number: 3,
+        question: "Wann ist eine Zahl durch 3 teilbar?",
+        hint: "Denk an die Quersumme.",
+        rule: "Eine Zahl ist durch 3 teilbar, wenn ihre Quersumme durch 3 teilbar ist."
+      },
+      {
+        number: 4,
+        question: "Wann ist eine Zahl durch 4 teilbar?",
+        hint: "Schau dir die letzten zwei Ziffern an.",
+        rule: "Eine Zahl ist durch 4 teilbar, wenn die letzten zwei Ziffern eine durch 4 teilbare Zahl bilden."
+      },
+      {
+        number: 5,
+        question: "Wann ist eine Zahl durch 5 teilbar?",
+        hint: "Letzte Ziffer!",
+        rule: "Eine Zahl ist durch 5 teilbar, wenn sie auf 0 oder 5 endet."
+      },
+      {
+        number: 6,
+        question: "Wann ist eine Zahl durch 6 teilbar?",
+        hint: "Kombination aus zwei Regeln.",
+        rule: "Eine Zahl ist durch 6 teilbar, wenn sie durch 2 und durch 3 teilbar ist."
+      },
+      {
+        number: 8,
+        question: "Wann ist eine Zahl durch 8 teilbar?",
+        hint: "Letzte drei Ziffern.",
+        rule: "Eine Zahl ist durch 8 teilbar, wenn die letzten drei Ziffern eine durch 8 teilbare Zahl bilden."
+      },
+      {
+        number: 9,
+        question: "Wann ist eine Zahl durch 9 teilbar?",
+        hint: "Wie bei 3 – nur stärker.",
+        rule: "Eine Zahl ist durch 9 teilbar, wenn ihre Quersumme durch 9 teilbar ist."
+      },
+      {
+        number: 10,
+        question: "Wann ist eine Zahl durch 10 teilbar?",
+        hint: "Ganz einfach.",
+        rule: "Eine Zahl ist durch 10 teilbar, wenn sie auf 0 endet."
+      },
+      {
+        number: 11,
+        question: "Wann ist eine Zahl durch 11 teilbar?",
+        hint: "Wechselnde Summen.",
+        rule: "Eine Zahl ist durch 11 teilbar, wenn die Differenz aus der Summe der Ziffern an ungeraden und geraden Stellen durch 11 teilbar ist."
+      },
+      {
+        number: 12,
+        question: "Wann ist eine Zahl durch 12 teilbar?",
+        hint: "Kombination aus 3 und 4.",
+        rule: "Eine Zahl ist durch 12 teilbar, wenn sie durch 3 und durch 4 teilbar ist."
+      },
+      {
+        number: 25,
+        question: "Wann ist eine Zahl durch 25 teilbar?",
+        hint: "Letzte zwei Ziffern.",
+        rule: "Eine Zahl ist durch 25 teilbar, wenn sie auf 00, 25, 50 oder 75 endet."
+      },
+      {
+        number: 125,
+        question: "Wann ist eine Zahl durch 125 teilbar?",
+        hint: "Letzte drei Ziffern.",
+        rule: "Eine Zahl ist durch 125 teilbar, wenn sie auf 000, 125, 250, 375, 500, 625, 750 oder 875 endet."
+      }
+    ];
+
+    const pillLabel = document.getElementById("pillLabel");
+    const questionText = document.getElementById("questionText");
+    const hintText = document.getElementById("hintText");
+    const answerBox = document.getElementById("answerBox");
+    const answerText = document.getElementById("answerText");
+    const showAnswerBtn = document.getElementById("showAnswerBtn");
+    const nextCardBtn = document.getElementById("nextCardBtn");
+    const cardCountEl = document.getElementById("cardCount");
+
+    let currentIndex = -1;
+    let totalShown = 0;
+
+    function getRandomIndex() {
+      if (cards.length === 1) return 0;
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * cards.length);
+      } while (idx === currentIndex);
+      return idx;
+    }
+
+    function showRandomCard() {
+      const idx = getRandomIndex();
+      currentIndex = idx;
+      const card = cards[idx];
+
+      pillLabel.textContent = "Teilbar durch " + card.number;
+      questionText.textContent = card.question;
+      hintText.textContent = card.hint;
+      answerText.textContent = card.rule;
+      answerBox.style.display = "none";
+
+      totalShown += 1;
+      cardCountEl.textContent = totalShown;
+    }
+
+    showAnswerBtn.addEventListener("click", () => {
+      answerBox.style.display = "block";
+    });
+
+    nextCardBtn.addEventListener("click", () => {
+      showRandomCard();
+    });
+
+    showRandomCard();
+  </script>
+</body>
+</html>
